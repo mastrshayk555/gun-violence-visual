@@ -3,6 +3,8 @@ from pathlib import Path
 import csv
 from datetime import datetime
 from helpers.state_mappings import us_state_to_abbrev
+from state_pop import process_state_pop
+
 
 BASE_DIR = Path.cwd()
 
@@ -39,6 +41,10 @@ def add_adjusted_date(df: pd.DataFrame):
 
 
 def group_by_date_state(df: pd.DataFrame):
+    """
+        Breaks down data into year groups, sums incidents by month and combines it all
+        back together into a new df
+    """
     date_list = set(df['year_month'].tolist())
     df_list = []
     for date in date_list:
@@ -52,17 +58,29 @@ def group_by_date_state(df: pd.DataFrame):
     concat_df.reset_index(inplace=True)
 
     return concat_df
+
+
+def total_incidents(df: pd.DataFrame):
+    df['total_incidents'] = ''
+    df['total_incidents'] = df['n_killed'] + df['n_injured']
     
+
 
 def prep_data() -> pd.DataFrame:
     df = pd.read_csv(gun_data, encoding = "ISO-8859-1", index_col='Incident ID')
+    pop_df = process_state_pop()
+    
     drop_unused(df)
     convert_types(df)
     add_state_abbr(df)
+    add_state_abbr(pop_df)
     add_adjusted_date(df)
     new_df = group_by_date_state(df)
+    total_incidents(new_df)
     return new_df
+
 
 #prep_data()
 if __name__ == '__main__':
-    prep_data()
+    df = prep_data()
+    #print(df)

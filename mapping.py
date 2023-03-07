@@ -4,8 +4,7 @@ import data_analysis
 
 
 df = data_analysis.prep_data()
-#states = with urlopen('https')
-print(df)
+
 fig = px.choropleth(
     df,
     locationmode="USA-states",
